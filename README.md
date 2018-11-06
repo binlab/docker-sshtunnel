@@ -14,13 +14,17 @@ mounted under `/sshtunnel_rsa` with `644` permissions.
 
 example for a Docker:
 
-    -v $(pwd)/remote_server.pem:/sshtunnel_rsa:ro
+```bash
+-v $(pwd)/remote_server.pem:/sshtunnel_rsa:ro
+```
 
 ### Configuration
 
 All configuration is set as additional parameters for Docker container, for example:
 
-    -R *:2222:127.0.0.1:22 user@public.server.com
+```bash
+-R *:2222:127.0.0.1:22 user@public.server.com
+```
 
 # Usage cases
 
@@ -81,11 +85,13 @@ Schematic of this case figure below:
 
 Config string of implementation:
 
-    -R *:2222:127.0.0.1:22
+```bash
+-R *:2222:127.0.0.1:22
+```
 
 Docker example:
 
-```
+```bash
 $ docker run --rm \
     --name sshtunnel \
     --network host \
@@ -97,7 +103,7 @@ $ docker run --rm \
 
 Docker-compose example:
 
-```
+```yaml
   sshtunnel:
     image: binlab/sshtunnel
     container_name: sshtunnel
@@ -129,11 +135,13 @@ Schematic of this case figure below:
 
 Config string of implementation:
 
-    -R *:80:nginx_container:80
+```bash
+-R *:80:nginx_container:80
+```
 
 Docker example:
 
-```
+```bash
 $ docker run --rm \
     --name sshtunnel \
     --hostname sshtunnel \
@@ -146,7 +154,7 @@ $ docker run --rm \
 
 Docker-compose example:
 
-```
+```yaml
   sshtunnel:
     image: binlab/sshtunnel
     container_name: sshtunnel
@@ -160,11 +168,3 @@ Docker-compose example:
     depends_on:
       - nginx-public
 ```
-
-
-
-
-
-
-
-
