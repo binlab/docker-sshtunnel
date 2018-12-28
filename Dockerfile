@@ -2,12 +2,18 @@ FROM alpine:3.8
 
 LABEL maintainer="Mark <mark.binlab@gmail.com>"
 
-RUN addgroup -S autossh \
-    && adduser -S -D -H -s /bin/false -g "AutoSSH Service" -G autossh autossh \
-    && set -x \
-    && apk add --no-cache autossh
+ARG USER=autossh
+ARG GROUP=autossh
+ARG UID=1024
+ARG GID=1024
 
-USER autossh
+RUN addgroup -S -g ${GID} ${GROUP} \
+    && adduser -S -D -H -s /bin/false -g "${USER} service" \
+           -u ${UID} -G ${GROUP} ${USER} \
+    && set -x \
+    && apk add --no-cache autossh libressl
+
+USER ${USER}
 
 ENTRYPOINT ["/usr/bin/autossh", \
     "-M", "0", "-T", "-N", "-g", "-v", \

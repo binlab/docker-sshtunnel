@@ -14,7 +14,7 @@ mounted under `/sshtunnel_rsa` with `644` permissions.
 
 example for a Docker:
 
-```bash
+```shell
 -v $(pwd)/remote_server.pem:/sshtunnel_rsa:ro
 ```
 
@@ -22,11 +22,11 @@ example for a Docker:
 
 All configuration is set as additional parameters for Docker container, for example:
 
-```bash
+```shell
 -R *:2222:127.0.0.1:22 user@public.server.com
 ```
 
-# Usage cases
+## Usage cases
 
 One of the cases when you have a remote machine behind a `NAT` without
 white IP and any acesses to `Firewall/NAT/Router` and you wish to
@@ -85,15 +85,16 @@ Schematic of this case figure below:
 
 Config string of implementation:
 
-```bash
+```shell
 -R *:2222:127.0.0.1:22
 ```
 
 Docker example:
 
-```bash
+```shell
 $ docker run --rm \
     --name sshtunnel \
+    --restart unless-stopped \
     --network host \
     -v $(pwd)/public_server.pem:/sshtunnel_rsa:ro \
     binlab/sshtunnel \
@@ -107,7 +108,7 @@ Docker-compose example:
   sshtunnel:
     image: binlab/sshtunnel
     container_name: sshtunnel
-    restart: always
+    restart: unless-stopped
     command: |
       -R *:2222:127.0.0.1:22
       user@public.server.com
@@ -135,16 +136,17 @@ Schematic of this case figure below:
 
 Config string of implementation:
 
-```bash
+```shell
 -R *:80:nginx_container:80
 ```
 
 Docker example:
 
-```bash
+```shell
 $ docker run --rm \
     --name sshtunnel \
     --hostname sshtunnel \
+    --restart unless-stopped \
     --link nginx-public \
     -v $(pwd)/public_server.pem:/sshtunnel_rsa:ro \
     binlab/sshtunnel \
@@ -159,7 +161,7 @@ Docker-compose example:
     image: binlab/sshtunnel
     container_name: sshtunnel
     hostname: sshtunnel
-    restart: always
+    restart: unless-stopped
     command: |
       -R *:80:nginx-public:80
       user@public.server.com
