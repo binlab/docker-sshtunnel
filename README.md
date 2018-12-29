@@ -15,7 +15,7 @@ mounted under `/sshtunnel_rsa` with `644` permissions.
 example for a Docker:
 
 ```shell
--v $(pwd)/remote_server.pem:/sshtunnel_rsa:ro
+-v $(pwd)/.remote_server.pem:/sshtunnel_rsa:ro
 ```
 
 ### Configuration
@@ -67,7 +67,7 @@ used together with -O forward the allocated port will be printed to the
 standard output.
 ```
 
-## 1. Connect to Remote Machine via `SSH` behind a `NAT`
+## 1. Connect to Remote Machine via `SSH` behind a `NAT` 
 
 Schematic of this case figure below:
 
@@ -83,28 +83,30 @@ Schematic of this case figure below:
                                                                         
     --------------------------------------------------------------------
 
-Config string of implementation:
+* Config string of implementation:
 
 ```shell
 -R *:2222:127.0.0.1:22
 ```
 
-Docker example:
+Docker example (`network: host`):
 
 ```shell
-$ docker run --rm \
+$ docker run -d \
     --name sshtunnel \
     --restart unless-stopped \
     --network host \
-    -v $(pwd)/public_server.pem:/sshtunnel_rsa:ro \
+    -v $(pwd)/.public_server.pem:/sshtunnel_rsa:ro \
     binlab/sshtunnel \
     '-R *:2222:127.0.0.1:22' \
     'user@public.server.com'
 ```
 
-Docker-compose example:
+Docker-compose example (`network: host`):
 
 ```yaml
+version: '3.3'
+services:
   sshtunnel:
     image: binlab/sshtunnel
     container_name: sshtunnel
@@ -113,8 +115,45 @@ Docker-compose example:
       -R *:2222:127.0.0.1:22
       user@public.server.com
     volumes:
-      - ./public_server.pem:/sshtunnel_rsa:ro
+      - ./.public_server.pem:/sshtunnel_rsa:ro
     network_mode: host
+```
+
+Docker example (`network: bridge`):
+
+```shell
+$ docker run -d \
+    --name sshtunnel \
+    --restart unless-stopped \
+    --add-host docker-host:172.17.0.1
+    -v $(pwd)/.public_server.pem:/sshtunnel_rsa:ro \
+    binlab/sshtunnel \
+    '-R *:2222:docker-host:22' \
+    'user@public.server.com'
+```
+
+Docker-compose example (`network: bridge`):
+
+```yaml
+version: '3.3'
+services:
+  sshtunnel:
+    image: binlab/sshtunnel
+    container_name: sshtunnel
+    restart: unless-stopped
+    command: |
+      -R *:2222:docker-host:22
+      user@public.server.com
+    volumes:
+      - ./.public_server.pem:/sshtunnel_rsa:ro
+    extra_hosts:
+      - docker-host:172.17.0.1
+    networks:
+      - sshtunnel
+
+networks:
+  sshtunnel:
+    driver: bridge
 ```
 
 ## 2. Connect to Nginx in Docker on Remote Machine behind a `NAT`
@@ -143,12 +182,12 @@ Config string of implementation:
 Docker example:
 
 ```shell
-$ docker run --rm \
+$ docker run -d \
     --name sshtunnel \
     --hostname sshtunnel \
     --restart unless-stopped \
     --link nginx-public \
-    -v $(pwd)/public_server.pem:/sshtunnel_rsa:ro \
+    -v $(pwd)/.public_server.pem:/sshtunnel_rsa:ro \
     binlab/sshtunnel \
     '-R *:80:nginx-public:80' \
     'user@public.server.com'
@@ -157,6 +196,8 @@ $ docker run --rm \
 Docker-compose example:
 
 ```yaml
+version: '3.3'
+services:
   sshtunnel:
     image: binlab/sshtunnel
     container_name: sshtunnel
@@ -166,7 +207,7 @@ Docker-compose example:
       -R *:80:nginx-public:80
       user@public.server.com
     volumes:
-      - ./public_server.pem:/sshtunnel_rsa:ro
+      - ./.public_server.pem:/sshtunnel_rsa:ro
     depends_on:
       - nginx-public
 ```
